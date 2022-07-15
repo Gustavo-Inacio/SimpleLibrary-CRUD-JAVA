@@ -19,12 +19,12 @@ public class Book {
 	@Transient
 	private static final String tablePrefix = "bk_";
 	
-	@Id @GeneratedValue(strategy = GenerationType.AUTO) @Column(name=Book.tablePrefix + "id")
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name=Book.tablePrefix + "id")
 	private int id;
 	@Column(name= Book.tablePrefix + "name")
 	private String name;
 	
-	@Column(name = Book.tablePrefix + "authour_fk") @ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Authour authour;
 	
 	@Column(name= Book.tablePrefix + "update")
@@ -35,9 +35,6 @@ public class Book {
 	private int status;
 	public int getId() {
 		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
 	}
 	public String getName() {
 		return name;

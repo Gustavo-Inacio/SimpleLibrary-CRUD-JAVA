@@ -1,6 +1,7 @@
 package model;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,13 +10,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Entity
 public class Authour {
 	
 	@Transient
 	private static final String tablePrefix = "au_";
 	
-	@Id @GeneratedValue(strategy = GenerationType.AUTO) @Column(name=Authour.tablePrefix + "id")
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name=Authour.tablePrefix + "id")
 	private int id;
 	@Column(name= Authour.tablePrefix + "name")
 	private String name;
@@ -24,18 +27,15 @@ public class Authour {
 	@Column(name= Authour.tablePrefix + "age")
 	private int age;
 	@Column(name= Authour.tablePrefix + "birthday")
-	private Timestamp birthday;
+	private Instant birthday;
 	@Column(name= Authour.tablePrefix + "update")
 	private Timestamp update;
-	@Column(name= Authour.tablePrefix + "create")
-	private Timestamp create;
-	@Column(name= Authour.tablePrefix + "status")
-	private int status;
+	@Column(name= Authour.tablePrefix + "create", insertable = false)
+	private Timestamp create; 
+	@Column(name= Authour.tablePrefix + "status") @ColumnDefault("1")
+	private int status = 1;
 	public int getId() {
 		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
 	}
 	public String getName() {
 		return name;
@@ -55,10 +55,10 @@ public class Authour {
 	public void setAge(int age) {
 		this.age = age;
 	}
-	public Timestamp getBirthday() {
+	public Instant getBirthday() {
 		return birthday;
 	}
-	public void setBirthday(Timestamp birthday) {
+	public void setBirthday(Instant birthday) {
 		this.birthday = birthday;
 	}
 	public Timestamp getUpdate() {
