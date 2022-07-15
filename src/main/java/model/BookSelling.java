@@ -18,12 +18,12 @@ public class BookSelling {
 	@Transient
 	private static final String tablePrefix = "bs_";
 	
-	@Id @GeneratedValue(strategy = GenerationType.AUTO) @Column(name=BookSelling.tablePrefix + "id")
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name=BookSelling.tablePrefix + "id")
 	private int id;
 	@Column(name= BookSelling.tablePrefix + "client_name")
 	private String clientName;
 	
-	@Column(name = BookSelling.tablePrefix + "book_fk") @ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Book book;
 	
 	@Column(name = BookSelling.tablePrefix + "price")
