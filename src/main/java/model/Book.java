@@ -5,13 +5,13 @@ import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
-
-import org.hibernate.annotations.ManyToAny;
 
 @Entity
 public class Book {
@@ -24,12 +24,13 @@ public class Book {
 	@Column(name= Book.tablePrefix + "name")
 	private String name;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY) 
+	@JoinColumn(foreignKey = @ForeignKey(name= Book.tablePrefix + "authour_fk"), name=Book.tablePrefix + "authour_fk", nullable=false)
 	private Authour authour;
 	
 	@Column(name= Book.tablePrefix + "update")
 	private Timestamp update;
-	@Column(name= Book.tablePrefix + "create")
+	@Column(name= Book.tablePrefix + "create",  insertable = false)
 	private Timestamp create;
 	@Column(name= Book.tablePrefix + "status")
 	private int status;

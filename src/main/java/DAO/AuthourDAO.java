@@ -3,6 +3,7 @@ package DAO;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 import model.Authour;
 import model.Book;
@@ -21,5 +22,13 @@ public class AuthourDAO {
 	public List<Authour> selectAll(){
 		String query = "SELECT bk Authour book as bk";
 		return this.em.createQuery(query, Authour.class).getResultList();
+	}
+
+	public Authour getAuthour(int auId) {
+		TypedQuery<Authour> query = em.createQuery(
+			"SELECT au FROM Authour as au WHERE au.id=:id", 
+			Authour.class	
+		);
+		return query.setParameter("id", auId).getSingleResult();
 	}
 }

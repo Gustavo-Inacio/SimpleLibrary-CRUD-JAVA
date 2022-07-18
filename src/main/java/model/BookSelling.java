@@ -9,6 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
@@ -24,6 +25,7 @@ public class BookSelling {
 	private String clientName;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name=BookSelling.tablePrefix + "book_fk", nullable=false)
 	private Book book;
 	
 	@Column(name = BookSelling.tablePrefix + "price")
@@ -31,7 +33,7 @@ public class BookSelling {
 	
 	@Column(name= BookSelling.tablePrefix + "update")
 	private Timestamp update;
-	@Column(name= BookSelling.tablePrefix + "create")
+	@Column(name= BookSelling.tablePrefix + "create", insertable = false)
 	private Timestamp create;
 	@Column(name= BookSelling.tablePrefix + "status")
 	private int status;
