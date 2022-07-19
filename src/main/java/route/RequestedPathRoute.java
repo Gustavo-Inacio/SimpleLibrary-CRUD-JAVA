@@ -1,10 +1,12 @@
 package route;
 
+import util.enuns.HttpMethods;
+
 public class RequestedPathRoute {
 	private String URI;
-	private String method;
+	private HttpMethods method;
 	
-	public RequestedPathRoute(String URI, String method) {
+	public RequestedPathRoute(String URI, HttpMethods method) {
 		this.URI = URI;
 		this.method = method;
 	}
@@ -13,7 +15,14 @@ public class RequestedPathRoute {
 		return URI;
 	}
 
-	public String getMethod() {
+	public HttpMethods getMethod() {
 		return method;
 	}
+
+	@Override
+	public String toString() {
+		return "RequestedPathRoute [URI=" + URI + ", method=" + method + "]";
+	}
+	
+	
 }

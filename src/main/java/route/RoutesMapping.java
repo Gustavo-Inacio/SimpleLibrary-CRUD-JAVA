@@ -8,8 +8,12 @@ import service.action.Action;
 import util.Exceptions.RouteNotFoundException;
 
 public class RoutesMapping {
-	private static RouteTree generalRoot = new RouteTree("");
+	private static RouteTree generalRoot;
 	public static final String endingDefault = "/index";
+	
+	static {
+		generalRoot = new RouteTree("/");
+	}
 	
 	public static Action getAction (RequestedPathRoute rpr) throws RouteNotFoundException {
 		String rootName = "/ParkingLot";
@@ -41,76 +45,38 @@ public class RoutesMapping {
 		String rootName = "/library";
 		String path = rpr.getURI().replace(rootName, "");
 		
-        
         String[] routing = path.split("(?=/)");
         
         Route route = null;
         
         int lastRoutePos = routing.length - 1;
-        RouteTree lastRouteTree = RoutesMapping.generalRoot.getEntireTree();
+        RouteTree lastRouteTree = RoutesMapping.generalRoot;
         
         try {
+	     for(int i = 0; i < routing.length ; i++) {
+	     	String actualRoutePath = routing[i]; 
+	     	
+	     	if(i != lastRoutePos ) { // if this path is not the last one, then go to the next route
+	     		lastRouteTree = lastRouteTree.getRouteTree(actualRoutePath);
+	     	}
+	     	else { // if this is the last route informed, it means that or there is a class to be executed, or the default route
+	     		if(lastRouteTree.hasChildPath(actualRoutePath, rpr.getMethod())) { // if the actual route is in the routes
+	     			route = lastRouteTree.getRoute(actualRoutePath, rpr.getMethod());
+	     			
+	     		}else { // if this class is not in the routesTree, then tries to access a tree's default root 
+	 				Route defaultRoute = lastRouteTree.getRouteTree(actualRoutePath).getDefaultRoute(rpr.getMethod());
+	     			route = defaultRoute;
+	     		}
+	     	}
+	     }
         	
-//        	if(RoutesMapping.generalRoot.hasChildrenTree()) {
-//     			lastRouteTree = RoutesMapping.generalRoot.getEntireTree();
-//     		}
-//        	else if(routing.length == 1) {
-//        		if(RoutesMapping.generalRoot.hasChildrenRoute()){
-//            		route = RoutesMapping.generalRoot.getRoute(routing[0]);
-//            	} else {
-//            		Route defaultRoute = lastRouteTree.getDefaultRoute();
-//         			route = defaultRoute;
-//            	}
-//        	}
-//        	else {
-//        		throw new RouteNotFoundException("Route not found");
-//        	}
-        	
-             
-             for(int i = 0; i < routing.length ; i++) {
-             	String actualRoutePath = routing[i];
-             	if(actualRoutePath.trim() == "/") {
-         			actualRoutePath = "";
-         		}
-             	if(i != lastRoutePos ) { // if this path is not the last one, then go to the next route
-             		lastRouteTree = lastRouteTree.getRouteTree(actualRoutePath);
-             	}
-             	else {
-             		if(lastRouteTree.hasChildPath(actualRoutePath))
-             			route = lastRouteTree.getRoute(actualRoutePath);
-             		else {
-
-             			System.out.println("Explode");
-             			
-         				System.out.println("Tring to get default ");
-         				Route defaultRoute = lastRouteTree.getDefaultRoute();
-             			route = defaultRoute;
-             			
-             			System.out.println("default rout -> " + defaultRoute);
-             		}
-             	}
-             }
-        	
-        }catch (RouteNotFoundException e) {
+        } catch (RouteNotFoundException e) {
         	List<String> r = Arrays.asList(routing);
 			System.out.println("RouteNotFound "+r+" -> " + e.getMessage());
 			throw e;
 		}
         
         return route;
-        
-       
-        
-//        try {
-//        	Class actionObject = Class.forName(actionClass.getName());
-//        	Action action = (Action) actionClass.newInstance(); // creates an instance of the action and return.
-//        
-//        	return action;
-//        	
-//        } catch (Exception e) {
-//        	System.err.println(e);
-//        	throw new RouteNotFoundException("Route not found -> " + e.getMessage());
-//		}
 	
 	}
 	

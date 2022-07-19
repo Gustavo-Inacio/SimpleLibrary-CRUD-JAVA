@@ -14,6 +14,7 @@ import service.action.Action;
 import service.action.CreateAuthour;
 import util.Exceptions.ActionClassMustImplementsActionInterface;
 import util.Exceptions.RouteNotFoundException;
+import util.enuns.HttpMethods;
 import util.messages.Message;
 
 public class RoutingTest {
@@ -21,7 +22,7 @@ public class RoutingTest {
 	@Test
 	public void shouldReturnCreateAuthourAction() throws RouteNotFoundException {
 		String URI = "/library/authour";
-		String method = "POST";
+		HttpMethods method = HttpMethods.POST;
 		
 		Route newRoute = new Route("/authour", method, CreateAuthour.class);
 		RoutesMapping.getGeneralRoot().appendRoute(newRoute);
@@ -39,7 +40,7 @@ public class RoutingTest {
 	@Test(expected = RouteNotFoundException.class)
 	public void shouldThrowARouteNotFoundException() throws RouteNotFoundException {
 		String URI = "/library/authour";
-		String method = "POST";
+		HttpMethods method = HttpMethods.POST;
 		
 		RequestedPathRoute rpr = new RequestedPathRoute(URI, method);
 		Route route = RoutesMapping.getRoute(rpr);
@@ -50,7 +51,7 @@ public class RoutingTest {
 	@Test
 	public void shouldReturnRouteFromTree() throws RouteNotFoundException {
 		String URI = "/library/authour/bio";
-		String method = "POST";
+		HttpMethods method = HttpMethods.POST;
 		
 		Route newRoute = new Route("/bio", method, CreateAuthour.class);
 		RouteTree rt = new RouteTree("/authour");
@@ -72,7 +73,7 @@ public class RoutingTest {
 	@Test
 	public void shouldReturnBaseRoute() throws RouteNotFoundException {
 		String URI = "/library/test";
-		String method = "POST";
+		HttpMethods method = HttpMethods.POST;
 		
 		Route newRoute = new Route("/test", method, CreateAuthour.class);
 
@@ -92,11 +93,11 @@ public class RoutingTest {
 	public void shouldDiferenciateBetweenTwoMethods() throws RouteNotFoundException {
 		String URI = "/library/testofmethod/test";
 		
-		RequestedPathRoute rprPOST = new RequestedPathRoute(URI, "POST");
-		RequestedPathRoute rprGET = new RequestedPathRoute(URI, "GET");
+		RequestedPathRoute rprPOST = new RequestedPathRoute(URI, HttpMethods.POST);
+		RequestedPathRoute rprGET = new RequestedPathRoute(URI, HttpMethods.GET);
 		
-		Route newRoutePOST = new Route("/test", "POST", TestInplementatonOfAction02.class);
-		Route newRouteGET = new Route("/test", "GET", TestInplementatonOfAction01.class);
+		Route newRoutePOST = new Route("/test", HttpMethods.POST, TestInplementatonOfAction02.class);
+		Route newRouteGET = new Route("/test", HttpMethods.GET, TestInplementatonOfAction01.class);
 		RouteTree rt = new RouteTree("/testofmethod");
 		rt.appendRoute(newRoutePOST);
 		rt.appendRoute(newRouteGET);
@@ -107,7 +108,7 @@ public class RoutingTest {
 		Route routeGET = RoutesMapping.getRoute(rprGET);
 		
 		Assert.assertEquals(routePOST.getActionClass(), TestInplementatonOfAction02.class);
-		Assert.assertEquals(routeGET.getActionClass(), TestInplementatonOfAction02.class);
+		Assert.assertEquals(routeGET.getActionClass(), TestInplementatonOfAction01.class);
 		
 		RoutesMapping.getGeneralRoot().removeRouteTree(rt);
 	}
@@ -116,16 +117,16 @@ public class RoutingTest {
 	public void shouldReturnDefaultRoute() throws RouteNotFoundException {
 		String URI = "/library/tree";
 		
-		RequestedPathRoute rprDefault = new RequestedPathRoute(URI, "POST");
-		RequestedPathRoute rprChild = new RequestedPathRoute(URI + "/child", "POST");
+		RequestedPathRoute rprDefault = new RequestedPathRoute(URI, HttpMethods.POST);
+		RequestedPathRoute rprChild = new RequestedPathRoute(URI + "/child", HttpMethods.POST);
 		
-		Route defaultRoute = new Route(RoutesMapping.endingDefault, "POST", TestInplementatonOfAction02.class);
-		Route childRoute = new Route("/child", "POST", TestInplementatonOfAction01.class);
+		Route defaultRoute = new Route(RoutesMapping.endingDefault, HttpMethods.POST, TestInplementatonOfAction02.class);
+		Route childRoute = new Route("/child", HttpMethods.POST, TestInplementatonOfAction01.class);
 		
 		RouteTree rt = new RouteTree("/tree");
 		
 		rt.appendRoute(childRoute);
-		rt.setDefaultRoute("POST", TestInplementatonOfAction02.class);
+		rt.setDefaultRoute(HttpMethods.POST, TestInplementatonOfAction02.class);
 
 		RoutesMapping.getGeneralRoot().appendRouteThree(rt);
 	

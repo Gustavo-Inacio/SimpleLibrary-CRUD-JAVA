@@ -1,15 +1,16 @@
 package route;
 
 import service.action.Action;
+import util.enuns.HttpMethods;
 
 public class Route {
 	private String path;
-	private String method;
+	private HttpMethods method;
 	private Class<? extends Action> actionClass;
 	private boolean isProtected = true;
 	
 	
-	public Route(String path, String method, Class<? extends Action> actionClass) {
+	public Route(String path, HttpMethods method, Class<? extends Action> actionClass) {
 		this.path = path;
 		this.method = method;
 		this.actionClass = actionClass;
@@ -21,10 +22,10 @@ public class Route {
 	public void setPath(String path) {
 		this.path = path;
 	}
-	public String getMethod() {
+	public HttpMethods getMethod() {
 		return method;
 	}
-	public void setMethod(String method) {
+	public void setMethod(HttpMethods method) {
 		this.method = method;
 	}
 	public Class<? extends Action> getActionClass() {
@@ -42,8 +43,8 @@ public class Route {
 
 	@Override
 	public String toString() {
-		return "Route [path=" + path + ", method=" + method + ", actionClass=" + actionClass + ", isProtected="
-				+ isProtected + "]";
+		return "\n \t Route [\n \t path=" + path + ",\n \t method=" + method + ",\n \t actionClass=" + actionClass + ",\n \t isProtected="
+				+ isProtected + "\n \t]";
 	}
 	
 	

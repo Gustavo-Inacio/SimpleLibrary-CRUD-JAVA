@@ -4,16 +4,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 import service.action.Action;
-import util.Exceptions.ActionClassMustImplementsActionInterface;
 import util.Exceptions.RouteNotFoundException;
+import util.enuns.HttpMethods;
 
 public class RouteTree {
 	private String path;
-	private Route defaultRoute;
-	private Map<String, Route> routeChildren = new HashMap<>();
+	private Map<HttpMethods, Route> defaultRoute = new HashMap<>();
+	//private Map<String, Map<HttpMethods, Route>> routeChildren = new HashMap<>();
+	private Map<String, RouteHttpMethod> routeChildren = new HashMap<>();
 	private Map<String, RouteTree> routeTree = new HashMap<>();
 	private boolean hasChildrenTree = false;
 	private boolean hasChildrenRoute = false;
+	
+	
+	public RouteTree(String path) {
+		this.path = path;
+		System.out.println(path + " path");
+	}
 	
 	private void updateHasChildrenTree() {
 		if(this.routeTree.isEmpty()) {
@@ -32,52 +39,61 @@ public class RouteTree {
 	}
 	
 	public boolean hasChild(Route route) {
-		return routeChildren.containsValue(route);
+		boolean contains = false;
+		if(this.routeChildren.containsKey(route.getPath())) { // if contains the path
+			contains = this.routeChildren.get(route.getPath()).hasRouteWith(route.getMethod()); // if contains the method
+		}
+		return contains;
 	}
 	
-	public boolean hasChildPath(String path) {
-		return routeChildren.containsKey(path);
+	public boolean hasChildPath(RequestedPathRoute rpr) {
+		//return routeChildren.containsKey(path);
+		boolean contains = false;
+		if(this.routeChildren.containsKey(rpr.getURI())) { // if contains the path
+			contains = this.routeChildren.get(rpr.getURI()).hasRouteWith(rpr.getMethod()); // if contains the method
+		}
+		return contains;
 	}
 	
+	public boolean hasChildPath(String path, HttpMethods method) {
+		//return routeChildren.containsKey(path);
+		RequestedPathRoute rpr = new RequestedPathRoute(path, method);
+		return this.hasChildPath(rpr);
+	}
+	
+	public boolean hasChildRouteTree(String path) {
+		return this.routeTree.containsKey(path);
+	}
 	
 	public boolean hasChildrenRoute() {
 		return hasChildrenRoute;
 	}
-	
-	public RouteTree(String path) {
-		this.path = path;
-		System.out.println(path + " path");
-	}
-	
+
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
-	public Route getDefaultRoute() throws RouteNotFoundException {
-		if(!(this.defaultRoute instanceof Route)) {
+	public Route getDefaultRoute(HttpMethods method) throws RouteNotFoundException {
+		if(!this.defaultRoute.containsKey(method) || this.defaultRoute.get(method).getActionClass() == null) {
 			throw new RouteNotFoundException("Tried to get default, but there is no default route in + " + this.path);			
 		}
 		
-		return this.defaultRoute;
+		return this.defaultRoute.get(method);
 	}
 
-	public void setDefaultRoute(String method, Class<? extends Action> defaultAction) {
-		this.defaultRoute = new Route(RoutesMapping.endingDefault, method, defaultAction);
+	public void setDefaultRoute(HttpMethods method, Class<? extends Action> defaultAction) {
+		Route newRoute = new Route(RoutesMapping.endingDefault, method, defaultAction);
 		
-		System.out.println("Appending default rout -> " + (this.defaultRoute ));
+		this.defaultRoute.put(method, newRoute);
 	}
 	
 	public void setDefaultRoute(Route route){
-		
-		this.defaultRoute = route;
+		route.setPath(RoutesMapping.endingDefault);
+		this.defaultRoute.put(route.getMethod(), route);
 	}
 
 	public void setPath(String path) {
 		this.path = path;
-	}
-	
-	public Map<String, Route> getRouteChildren() {
-		return routeChildren;
 	}
 
 	public void removeRouteChildren(Route routeChildren) {
@@ -105,11 +121,17 @@ public class RouteTree {
 		return this;
 	}
 	
-	public Route getRoute(String route) throws RouteNotFoundException {
-		if(!this.routeChildren.containsKey(route))
-			throw new RouteNotFoundException("Route " + route + " not found!");
+	public Route getRoute(RequestedPathRoute rpr) throws RouteNotFoundException {
+		if(!this.routeChildren.containsKey(rpr.getURI()) || !this.routeChildren.get(rpr.getURI()).hasRouteWith(rpr.getMethod()))
+			throw new RouteNotFoundException("Route " + rpr + " not found!");
 		
-		return this.routeChildren.get(route);
+		return this.routeChildren.get(rpr.getURI()).getRoute(rpr.getMethod());
+	}
+	
+	public Route getRoute(String path, HttpMethods method) throws RouteNotFoundException {
+		RequestedPathRoute rpr = new RequestedPathRoute(path, method);
+		
+		return this.getRoute(rpr);
 	}
 
 	public void setRouteTree(Map<String, RouteTree> routeTree) {
@@ -119,13 +141,33 @@ public class RouteTree {
 
 	public void appendRoute(Route route) {
 		this.updateHasChildrenRoute();
-		this.routeChildren.put(route.getPath(), route);
+		boolean hasPath = this.routeChildren.containsKey(route.getPath());
+		if(hasPath) {
+			RouteHttpMethod routeWithThisPath = this.routeChildren.get(route.getPath());
+			routeWithThisPath.addRoute(route);
+		}
+		else {
+			RouteHttpMethod newPath = new RouteHttpMethod(route.getPath());
+			newPath.addRoute(route);
+			this.routeChildren.put(route.getPath(), newPath);
+		}
+		
+		
 	}
 	
 	public void appendRouteThree(RouteTree tree) {
 		this.updateHasChildrenTree();
 		this.routeTree.put(tree.getPath(), tree);
 	}
+
+	@Override
+	public String toString() {
+		return "\n \t RouteTree [\n \t path=" + path + ",\n \t defaultRoute=" + defaultRoute + ",\n \t routeChildren=" + routeChildren
+				+ ",\n \t routeTree=" + routeTree + ",\n \t hasChildrenTree=" + hasChildrenTree + ",\n \t hasChildrenRoute="
+				+ hasChildrenRoute + "\n \t]";
+	}
+	
+	
 
 	
 	
