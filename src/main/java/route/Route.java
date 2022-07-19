@@ -5,11 +5,11 @@ import service.action.Action;
 public class Route {
 	private String path;
 	private String method;
-	private Action actionClass;
+	private Class<? extends Action> actionClass;
 	private boolean isProtected = true;
 	
 	
-	public Route(String path, String method, Action actionClass) {
+	public Route(String path, String method, Class<? extends Action> actionClass) {
 		this.path = path;
 		this.method = method;
 		this.actionClass = actionClass;
@@ -27,10 +27,10 @@ public class Route {
 	public void setMethod(String method) {
 		this.method = method;
 	}
-	public Action getActionClass() {
+	public Class<? extends Action> getActionClass() {
 		return actionClass;
 	}
-	public void setActionClass(Action actionClass) {
+	public void setActionClass(Class<Action> actionClass) {
 		this.actionClass = actionClass;
 	}
 	public boolean isProtected() {
@@ -39,6 +39,13 @@ public class Route {
 	public void setProtected(boolean isProtected) {
 		this.isProtected = isProtected;
 	}
+
+	@Override
+	public String toString() {
+		return "Route [path=" + path + ", method=" + method + ", actionClass=" + actionClass + ", isProtected="
+				+ isProtected + "]";
+	}
+	
 	
 	
 }

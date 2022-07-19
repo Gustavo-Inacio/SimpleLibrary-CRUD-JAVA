@@ -1,60 +1,28 @@
 package route;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import br.com.parking.service.actions.company.CreateCompanyAction;
-import br.com.parking.service.actions.company.DeleteCompanyAction;
-import br.com.parking.service.actions.company.UpdateCompanyAction;
-import br.com.parking.service.actions.employee.CreateEmployeeAction;
-import br.com.parking.service.actions.employee.DeleteEmployeeAction;
-import br.com.parking.service.actions.employee.GetAccessToken;
-import br.com.parking.service.actions.employee.UpdateEmployeeAction;
-import br.com.parking.service.actions.parkinglot.CreateParkinglot;
-import br.com.parking.service.actions.vehicle.type.CreateVehicleType;
 import service.action.Action;
 import util.Exceptions.RouteNotFoundException;
 
 public class RoutesMapping {
-	private static RouteTree generalRoot = new RouteTree("/");
-	private static String endingDefault = "/index";
+	private static RouteTree generalRoot = new RouteTree("");
+	public static final String endingDefault = "/index";
 	
-	public static Action getAction (String URI) throws RouteNotFoundException {
+	public static Action getAction (RequestedPathRoute rpr) throws RouteNotFoundException {
 		String rootName = "/ParkingLot";
-		String path = URI.replace(rootName, "");
+		String path = rpr.getURI().replace(rootName, "");
         
         String[] routing = path.split("(?=/)");
         
-        Map lastRoute = new HashMap();
         Class actionClass = null;
         
-        
-        int lastIterate = routing.length - 1;
-        for (int i = 0; i < routing.length && actionClass == null ; i++) {
-        	if(i == 0) { // if it is the first verify
-        		if(generalRoot.get(routing[0]) instanceof Map) { // if the route is a map with other routes, save it to iterate, if not, execute the action
-            		lastRoute = (Map) generalRoot.get(routing[0]);	// saving the map to continue iterating the routes
-            	} else {
-            		actionClass = (Class) generalRoot.get(routing[i]); // save the action class to be executed
-            	}
-        	} else {
-        		if(lastRoute.get(routing[i]) instanceof Map) {
-            		lastRoute = (Map) lastRoute.get(routing[i]);
-            	} else  {
-            		actionClass = (Class) lastRoute.get(routing[i]);
-             	}
-        	}	
+        int lastRoutePos = routing.length - 1;
+        for(int i = 0; i < routing.length; i++) {
         	
-        	if(i == lastIterate  && actionClass == null ) {
-        		// if this is the lats verification and no action was found.
-        		if(lastRoute.containsKey(endingDefault)) { // if this path has a default action, apply. Or else, throw an Exception   			
-        			actionClass = (Class) lastRoute.get(endingDefault);
-        		} else { // if the route wasnt find and there is no default 
-        			throw new RouteNotFoundException(path);
-        		}
-        	}
-		}
-        
+        }
         
         try {
         	Class actionObject = Class.forName(actionClass.getName());
@@ -69,16 +37,84 @@ public class RoutesMapping {
 	
 	}
 	
-	public void generateBaseRouting() {
+	public static Route getRoute(RequestedPathRoute rpr) throws RouteNotFoundException {
+		String rootName = "/library";
+		String path = rpr.getURI().replace(rootName, "");
 		
+        
+        String[] routing = path.split("(?=/)");
+        
+        Route route = null;
+        
+        int lastRoutePos = routing.length - 1;
+        RouteTree lastRouteTree = RoutesMapping.generalRoot.getEntireTree();
+        
+        try {
+        	
+//        	if(RoutesMapping.generalRoot.hasChildrenTree()) {
+//     			lastRouteTree = RoutesMapping.generalRoot.getEntireTree();
+//     		}
+//        	else if(routing.length == 1) {
+//        		if(RoutesMapping.generalRoot.hasChildrenRoute()){
+//            		route = RoutesMapping.generalRoot.getRoute(routing[0]);
+//            	} else {
+//            		Route defaultRoute = lastRouteTree.getDefaultRoute();
+//         			route = defaultRoute;
+//            	}
+//        	}
+//        	else {
+//        		throw new RouteNotFoundException("Route not found");
+//        	}
+        	
+             
+             for(int i = 0; i < routing.length ; i++) {
+             	String actualRoutePath = routing[i];
+             	if(actualRoutePath.trim() == "/") {
+         			actualRoutePath = "";
+         		}
+             	if(i != lastRoutePos ) { // if this path is not the last one, then go to the next route
+             		lastRouteTree = lastRouteTree.getRouteTree(actualRoutePath);
+             	}
+             	else {
+             		if(lastRouteTree.hasChildPath(actualRoutePath))
+             			route = lastRouteTree.getRoute(actualRoutePath);
+             		else {
+
+             			System.out.println("Explode");
+             			
+         				System.out.println("Tring to get default ");
+         				Route defaultRoute = lastRouteTree.getDefaultRoute();
+             			route = defaultRoute;
+             			
+             			System.out.println("default rout -> " + defaultRoute);
+             		}
+             	}
+             }
+        	
+        }catch (RouteNotFoundException e) {
+        	List<String> r = Arrays.asList(routing);
+			System.out.println("RouteNotFound "+r+" -> " + e.getMessage());
+			throw e;
+		}
+        
+        return route;
+        
+       
+        
+//        try {
+//        	Class actionObject = Class.forName(actionClass.getName());
+//        	Action action = (Action) actionClass.newInstance(); // creates an instance of the action and return.
+//        
+//        	return action;
+//        	
+//        } catch (Exception e) {
+//        	System.err.println(e);
+//        	throw new RouteNotFoundException("Route not found -> " + e.getMessage());
+//		}
+	
 	}
 	
-	public void add(String path, Action actionClass, String method) {
-		Route route = new Route(path, method, actionClass);
-		this.add(route);
-	}
-	
-	public void add(Route route) {
-		
+	public static RouteTree getGeneralRoot() {
+		return RoutesMapping.generalRoot;
 	}
 }
