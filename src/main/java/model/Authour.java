@@ -19,22 +19,22 @@ public class Authour {
 	private static final String tablePrefix = "au_";
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name=Authour.tablePrefix + "id")
-	private int id;
-	@Column(name= Authour.tablePrefix + "name")
+	private Integer id;
+	@Column(name= Authour.tablePrefix + "name", nullable = false) 
 	private String name;
 	@Column(name= Authour.tablePrefix + "surname")
 	private String surname;
 	@Column(name= Authour.tablePrefix + "age")
 	private int age;
-	@Column(name= Authour.tablePrefix + "birthday")
+	@Column(name= Authour.tablePrefix + "birthday", nullable = false)
 	private Instant birthday;
 	@Column(name= Authour.tablePrefix + "update")
 	private Timestamp update;
-	@Column(name= Authour.tablePrefix + "create", insertable = false)
+	@Column(name= Authour.tablePrefix + "create", insertable = false, updatable = false)
 	private Timestamp create; 
-	@Column(name= Authour.tablePrefix + "status") @ColumnDefault("1")
+	@Column(name= Authour.tablePrefix + "status", nullable = false)
 	private int status = 1;
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 	public String getName() {
@@ -73,17 +73,4 @@ public class Authour {
 	public void setStatus(int status) {
 		this.status = status;
 	}
-	
-	
-	
-//	au_id int not null auto_increment,
-//    au_name varchar(50) not null,
-//    au_surname varchar(100),
-//    au_age int,
-//    au_birthday timestamp not null,
-//    au_update timestamp on update now(),
-//    au_create timestamp not null default now(),
-//    au_status int not null default 1,
-    
-//    primary key(au_id)
 }

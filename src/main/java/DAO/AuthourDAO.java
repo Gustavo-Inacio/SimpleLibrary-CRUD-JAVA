@@ -3,10 +3,10 @@ package DAO;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import model.Authour;
-import model.Book;
 
 public class AuthourDAO {
 	private EntityManager em;
@@ -30,5 +30,13 @@ public class AuthourDAO {
 			Authour.class	
 		);
 		return query.setParameter("id", auId).getSingleResult();
+	}
+	
+	public void remove(Integer id) {
+		Authour authour = this.getAuthour(id);
+		authour.setStatus(0);
+		System.out.println(id);
+		
+		
 	}
 }
