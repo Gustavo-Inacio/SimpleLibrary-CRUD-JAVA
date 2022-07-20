@@ -10,7 +10,6 @@ import util.enuns.HttpMethods;
 public class RouteTree {
 	private String path;
 	private Map<HttpMethods, Route> defaultRoute = new HashMap<>();
-	//private Map<String, Map<HttpMethods, Route>> routeChildren = new HashMap<>();
 	private Map<String, RouteHttpMethod> routeChildren = new HashMap<>();
 	private Map<String, RouteTree> routeTree = new HashMap<>();
 	private boolean hasChildrenTree = false;
@@ -19,7 +18,6 @@ public class RouteTree {
 	
 	public RouteTree(String path) {
 		this.path = path;
-		System.out.println(path + " path");
 	}
 	
 	private void updateHasChildrenTree() {
@@ -47,7 +45,6 @@ public class RouteTree {
 	}
 	
 	public boolean hasChildPath(RequestedPathRoute rpr) {
-		//return routeChildren.containsKey(path);
 		boolean contains = false;
 		if(this.routeChildren.containsKey(rpr.getURI())) { // if contains the path
 			contains = this.routeChildren.get(rpr.getURI()).hasRouteWith(rpr.getMethod()); // if contains the method
@@ -56,7 +53,6 @@ public class RouteTree {
 	}
 	
 	public boolean hasChildPath(String path, HttpMethods method) {
-		//return routeChildren.containsKey(path);
 		RequestedPathRoute rpr = new RequestedPathRoute(path, method);
 		return this.hasChildPath(rpr);
 	}
@@ -96,9 +92,15 @@ public class RouteTree {
 		this.path = path;
 	}
 
-	public void removeRouteChildren(Route routeChildren) {
+	public void removeRouteChildren(Route routeChid) {
+		if(this.routeChildren.containsKey(routeChid.getPath())) {
+			RouteHttpMethod methods = this.routeChildren.get(routeChid.getPath());
+			if(methods.hasRouteWith(routeChid.getMethod())) {
+				methods.removeRoute(routeChid);
+			}
+		}
+		
 		this.updateHasChildrenRoute();
-		this.routeChildren.remove(routeChildren.getPath(), routeChildren);
 	}
 	
 	public void removeRouteTree(RouteTree routeTree) {
@@ -155,7 +157,7 @@ public class RouteTree {
 		
 	}
 	
-	public void appendRouteThree(RouteTree tree) {
+	public void appendRouteTree(RouteTree tree) {
 		this.updateHasChildrenTree();
 		this.routeTree.put(tree.getPath(), tree);
 	}

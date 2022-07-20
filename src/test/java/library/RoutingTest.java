@@ -30,9 +30,9 @@ public class RoutingTest {
 		RequestedPathRoute rpr = new RequestedPathRoute(URI, method);
 		Route route = RoutesMapping.getRoute(rpr);
 		
-		System.out.println(route);
-		
 		RoutesMapping.getGeneralRoot().removeRouteChildren(newRoute);
+		
+		RoutesMapping.getGeneralRoot().removeRouteChildren(route);
 		
 		Assert.assertEquals(route.getActionClass(), CreateAuthour.class);
 	}
@@ -44,9 +44,39 @@ public class RoutingTest {
 		
 		RequestedPathRoute rpr = new RequestedPathRoute(URI, method);
 		Route route = RoutesMapping.getRoute(rpr);
-		
 	}
 	
+	@Test(expected = RouteNotFoundException.class)
+	public void shouldThrowARouteNotFoundExceptionForEmpty() throws RouteNotFoundException{
+		String URI = "/";
+		HttpMethods method = HttpMethods.POST;
+		
+		RequestedPathRoute rpr = new RequestedPathRoute(URI, method);
+		Route route = RoutesMapping.getRoute(rpr);
+	}
+	
+	@Test
+	public void shouldDifferentiateDefaultPathsByMethod() throws RouteNotFoundException {
+		RequestedPathRoute rpr = new RequestedPathRoute("/library/treeTest", HttpMethods.POST);
+		RequestedPathRoute rprGET = new RequestedPathRoute("/library/treeTest", HttpMethods.GET);
+		
+		RouteTree rt = new RouteTree("/treeTest");
+		Route defaultRoutePOST = new Route("", HttpMethods.POST, TestImplementationOfAction01.class);
+		Route defaultRouteGET = new Route("", HttpMethods.GET, TestImplementationOfAction02.class);
+		rt.setDefaultRoute(defaultRoutePOST);
+		rt.setDefaultRoute(defaultRouteGET);
+		
+		RoutesMapping.getGeneralRoot().appendRouteTree(rt);
+		
+		Route routePOST = RoutesMapping.getRoute(rpr);
+		Route routeGET = RoutesMapping.getRoute(rprGET);
+		
+		Assert.assertEquals(routePOST.getActionClass(), defaultRoutePOST.getActionClass());
+		Assert.assertEquals(routeGET.getActionClass(), defaultRouteGET.getActionClass());
+		
+		RoutesMapping.getGeneralRoot().removeRouteTree(rt);
+		
+	}
 	
 	@Test
 	public void shouldReturnRouteFromTree() throws RouteNotFoundException {
@@ -57,12 +87,10 @@ public class RoutingTest {
 		RouteTree rt = new RouteTree("/authour");
 		rt.appendRoute(newRoute);
 		
-		RoutesMapping.getGeneralRoot().appendRouteThree(rt);
+		RoutesMapping.getGeneralRoot().appendRouteTree(rt);
 		
 		RequestedPathRoute rpr = new RequestedPathRoute(URI, method);
 		Route route = RoutesMapping.getRoute(rpr);
-		
-		System.out.println(route);
 		
 		Assert.assertEquals(route.getActionClass(), CreateAuthour.class);
 		
@@ -82,8 +110,6 @@ public class RoutingTest {
 		RequestedPathRoute rpr = new RequestedPathRoute(URI, method);
 		Route route = RoutesMapping.getRoute(rpr);
 		
-		System.out.println(route);
-		
 		Assert.assertEquals(route.getActionClass(), CreateAuthour.class);
 		
 		RoutesMapping.getGeneralRoot().removeRouteChildren(newRoute);
@@ -96,19 +122,19 @@ public class RoutingTest {
 		RequestedPathRoute rprPOST = new RequestedPathRoute(URI, HttpMethods.POST);
 		RequestedPathRoute rprGET = new RequestedPathRoute(URI, HttpMethods.GET);
 		
-		Route newRoutePOST = new Route("/test", HttpMethods.POST, TestInplementatonOfAction02.class);
-		Route newRouteGET = new Route("/test", HttpMethods.GET, TestInplementatonOfAction01.class);
+		Route newRoutePOST = new Route("/test", HttpMethods.POST, TestImplementationOfAction02.class);
+		Route newRouteGET = new Route("/test", HttpMethods.GET, TestImplementationOfAction01.class);
 		RouteTree rt = new RouteTree("/testofmethod");
 		rt.appendRoute(newRoutePOST);
 		rt.appendRoute(newRouteGET);
 
-		RoutesMapping.getGeneralRoot().appendRouteThree(rt);
+		RoutesMapping.getGeneralRoot().appendRouteTree(rt);
 	
 		Route routePOST = RoutesMapping.getRoute(rprPOST);
 		Route routeGET = RoutesMapping.getRoute(rprGET);
 		
-		Assert.assertEquals(routePOST.getActionClass(), TestInplementatonOfAction02.class);
-		Assert.assertEquals(routeGET.getActionClass(), TestInplementatonOfAction01.class);
+		Assert.assertEquals(routePOST.getActionClass(), TestImplementationOfAction02.class);
+		Assert.assertEquals(routeGET.getActionClass(), TestImplementationOfAction01.class);
 		
 		RoutesMapping.getGeneralRoot().removeRouteTree(rt);
 	}
@@ -120,33 +146,28 @@ public class RoutingTest {
 		RequestedPathRoute rprDefault = new RequestedPathRoute(URI, HttpMethods.POST);
 		RequestedPathRoute rprChild = new RequestedPathRoute(URI + "/child", HttpMethods.POST);
 		
-		Route defaultRoute = new Route(RoutesMapping.endingDefault, HttpMethods.POST, TestInplementatonOfAction02.class);
-		Route childRoute = new Route("/child", HttpMethods.POST, TestInplementatonOfAction01.class);
+		Route defaultRoute = new Route(RoutesMapping.endingDefault, HttpMethods.POST, TestImplementationOfAction02.class);
+		Route childRoute = new Route("/child", HttpMethods.POST, TestImplementationOfAction01.class);
 		
 		RouteTree rt = new RouteTree("/tree");
 		
 		rt.appendRoute(childRoute);
-		rt.setDefaultRoute(HttpMethods.POST, TestInplementatonOfAction02.class);
+		rt.setDefaultRoute(HttpMethods.POST, TestImplementationOfAction02.class);
 
-		RoutesMapping.getGeneralRoot().appendRouteThree(rt);
+		RoutesMapping.getGeneralRoot().appendRouteTree(rt);
 	
 		Route childReturned = RoutesMapping.getRoute(rprChild);
 		Route defaultReturned = RoutesMapping.getRoute(rprDefault);
 		
-		Assert.assertEquals(childReturned.getActionClass(), TestInplementatonOfAction01.class);
-		Assert.assertEquals(defaultReturned.getActionClass(), TestInplementatonOfAction02.class);
+		Assert.assertEquals(childReturned.getActionClass(), TestImplementationOfAction01.class);
+		Assert.assertEquals(defaultReturned.getActionClass(), TestImplementationOfAction02.class);
 		
 		RoutesMapping.getGeneralRoot().removeRouteTree(rt);
-	}
-	
-	@Test
-	public void shouldNotReturnAction() {
-		
 	}
 }
 
 
-class TestInplementatonOfAction01 implements Action{
+class TestImplementationOfAction01 implements Action{
 
 	@Override
 	public Message execute(HttpServletRequest request, HttpServletResponse response) {
@@ -155,7 +176,7 @@ class TestInplementatonOfAction01 implements Action{
 	}
 }
 
-class TestInplementatonOfAction02 implements Action{
+class TestImplementationOfAction02 implements Action{
 
 	@Override
 	public Message execute(HttpServletRequest request, HttpServletResponse response) {
