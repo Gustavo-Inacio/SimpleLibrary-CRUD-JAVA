@@ -1,10 +1,14 @@
 package library;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 
+import org.hibernate.PropertyValueException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -95,13 +99,44 @@ public class TestDaoStructures {
 		int auId = authour.getId();
 		Authour authourGetter = authourDao.getAuthour(auId);
 		
-		Assert.assertEquals(auId, authourGetter.getId());
 		Assert.assertEquals(authour.getName(), authourGetter.getName());
 		Assert.assertEquals(authour.getSurname(), authourGetter.getSurname());
 		Assert.assertEquals(authour.getAge(), authourGetter.getAge());
 		Assert.assertEquals(authour.getBirthday(), authourGetter.getBirthday());
 		
-		System.out.println(authour.getId());
+		em.getTransaction().rollback();
+		em.close();
+	}
+	
+	@Test
+	public void shouldRemoveAuthour() {
+		Authour authour = this.generateAuthour();
+		EntityManager em = JPAUtil.getEntityManeger();
+		AuthourDAO authourDao = new AuthourDAO(em);
+		
+		em.getTransaction().begin();
+		authourDao.insert(authour);
+		authourDao.remove(authour.getId());
+		System.out.println(authour);
+		int status = authourDao.getAuthour(authour.getId()).getStatus();
+		
+		em.getTransaction().rollback();
+		em.close();
+		
+		Assert.assertEquals(0, status);
+	}
+	
+	@Test(expected= PersistenceException.class)
+	public void shouldNotInsertAuthourBecauseDataIsNull() {
+		Authour authour = this.generateAuthour();
+		authour.setName(null);
+		authour.setBirthday(null);
+		
+		EntityManager em = JPAUtil.getEntityManeger();
+		AuthourDAO authourDao = new AuthourDAO(em);
+		em.getTransaction().begin();
+		
+		authourDao.insert(authour);
 		
 		em.getTransaction().rollback();
 		em.close();
