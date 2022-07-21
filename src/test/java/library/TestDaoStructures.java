@@ -1,14 +1,13 @@
 package library;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
-import org.hibernate.PropertyValueException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -171,6 +170,165 @@ public class TestDaoStructures {
 		em.getTransaction().rollback();
 		em.close();
 		
+	}
+	
+	@Test
+	public void shouldReturnAuthourDataByPartOfName() {
+		EntityManager em = JPAUtil.getEntityManeger();
+		
+		AuthourDAO authourDAO = new AuthourDAO(em);
+		Authour authour = this.generateAuthour();
+		authour.setName("Mickel");
+		
+		String partOfName = "Mi";
+		
+		em.getTransaction().begin();
+		
+		authourDAO.insert(authour);
+		
+		List<Authour> selectedAutour = authourDAO.getPartOfInfo(authour);
+		
+		List<Authour> authourVerified = selectedAutour.stream()
+				.filter(elem -> elem.getName().startsWith(partOfName))
+				.collect(Collectors.toList());
+		
+		Assert.assertEquals(selectedAutour, authourVerified);
+		Assert.assertFalse(authourVerified.isEmpty());
+		
+		em.getTransaction().rollback();
+		em.close();
+		
+	}
+	
+	@Test
+	public void shouldReturnTwoAuthoursDataByPartOfName() {
+		EntityManager em = JPAUtil.getEntityManeger();
+		
+		AuthourDAO authourDAO = new AuthourDAO(em);
+		Authour authour = this.generateAuthour();
+		Authour authour2 = this.generateAuthour();
+		authour2.setName("Mijact");
+		authour.setName("Mickel");
+		
+		String partOfName = "Mi";
+		
+		em.getTransaction().begin();
+		
+		authourDAO.insert(authour);
+		authourDAO.insert(authour2);
+		
+		Authour authourForSearch = new Authour();
+		authourForSearch.setName(partOfName);
+		
+		List<Authour> selectedAutour = authourDAO.getPartOfInfo(authourForSearch);
+		
+		List<Authour> authourVerified = selectedAutour.stream()
+				.filter(elem -> elem.getName().startsWith(partOfName))
+				.collect(Collectors.toList());
+		
+		Assert.assertEquals(selectedAutour, authourVerified);
+		Assert.assertTrue(selectedAutour.size() >= 2);
+		
+		em.getTransaction().rollback();
+		em.close();
+		
+	}
+	
+	@Test
+	public void shouldReturnOneAuthoursDataByPartOfName() {
+		EntityManager em = JPAUtil.getEntityManeger();
+		
+		AuthourDAO authourDAO = new AuthourDAO(em);
+		Authour authour = this.generateAuthour();
+		Authour authour2 = this.generateAuthour();
+		authour2.setName("Francis");
+		authour.setName("Mickel");
+		
+		String partOfName = "Mi";
+		
+		em.getTransaction().begin();
+		
+		authourDAO.insert(authour);
+		authourDAO.insert(authour2);
+		
+		Authour authourForSearch = new Authour();
+		authourForSearch.setName(partOfName);
+		
+		List<Authour> selectedAutour = authourDAO.getPartOfInfo(authourForSearch);
+		
+		List<Authour> authourVerified = selectedAutour.stream()
+				.filter(elem -> elem.getName().startsWith(partOfName))
+				.collect(Collectors.toList());
+		
+		Assert.assertEquals(selectedAutour, authourVerified);
+		Assert.assertTrue(selectedAutour.size() >= 1);
+		
+		em.getTransaction().rollback();
+		em.close();
+		
+	}
+	
+	@Test
+	public void shouldReturnOneAuthoursDataByNameSurnameAndBirthday() {
+		EntityManager em = JPAUtil.getEntityManeger();
+		
+		AuthourDAO authourDAO = new AuthourDAO(em);
+		Authour authour = this.generateAuthour();
+		Authour authour2 = this.generateAuthour();
+		authour2.setName("Francis");
+		authour2.setSurname("Bacon");
+		
+		authour.setName("Mickel");
+		
+		Authour authourForSearch = new Authour();
+		authourForSearch.setName("Mickel");
+		authourForSearch.setBirthday(authour.getBirthday());
+		authourForSearch.setSurname(authour.getSurname());
+		
+		em.getTransaction().begin();
+		
+		authourDAO.insert(authour);
+		authourDAO.insert(authour2);
+		
+		
+		List<Authour> selectedAutour = authourDAO.getPartOfInfo(authourForSearch);
+		
+		List<Authour> authourVerified = selectedAutour.stream()
+				.filter(elem -> elem.getName().startsWith("Mi"))
+				.collect(Collectors.toList());
+		
+		Assert.assertEquals(selectedAutour, authourVerified);
+		Assert.assertTrue(selectedAutour.size() >= 1);
+		
+		em.getTransaction().rollback();
+		em.close();
+		
+	}
+	
+	@Test
+	public void shouldUpdateNameAndSurname() {
+		EntityManager em = JPAUtil.getEntityManeger();
+		
+		AuthourDAO authourDAO = new AuthourDAO(em);
+		Authour authour = this.generateAuthour();
+		authour.setName("Name before update");
+		authour.setSurname("surname before update");
+		
+		Authour authour2 = this.generateAuthour();
+		authour2.setName("Name after update");
+		authour2.setSurname("surname after update");
+		
+		em.getTransaction().begin();
+		
+		authourDAO.insert(authour);
+		authour.setAllPermitedFields(authour2);
+		
+		Authour authourGetter = authourDAO.getAuthour(authour.getId());
+		Assert.assertEquals(authourGetter.getName(), "Name after update");
+		Assert.assertEquals(authourGetter.getSurname(), "surname after update");
+		
+		em.getTransaction().rollback();
+		em.close();
 	}
 	
 	

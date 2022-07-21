@@ -2,6 +2,7 @@ package model;
 
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -24,7 +25,7 @@ public class Book {
 	@Column(name= Book.tablePrefix + "name")
 	private String name;
 	
-	@ManyToOne(fetch = FetchType.LAZY) 
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST) 
 	@JoinColumn(foreignKey = @ForeignKey(name= Book.tablePrefix + "authour_fk"), name=Book.tablePrefix + "authour_fk", nullable=false)
 	private Authour authour;
 	
@@ -34,6 +35,15 @@ public class Book {
 	private Timestamp create;
 	@Column(name= Book.tablePrefix + "status")
 	private int status;
+	
+	public Book() {
+		
+	}
+	
+	public Book(String name, Authour authour) {
+		this.name = name;
+		this.authour = authour;
+	}
 	public int getId() {
 		return id;
 	}

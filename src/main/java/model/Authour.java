@@ -2,15 +2,15 @@ package model;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Transient;
-
-import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 public class Authour {
@@ -34,6 +34,20 @@ public class Authour {
 	private Timestamp create; 
 	@Column(name= Authour.tablePrefix + "status", nullable = false)
 	private int status = 1;
+	
+	@OneToMany(mappedBy = "authour")
+	private Set<Book> bookList;
+	
+	public Authour() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public Authour(String name, String surname, int age, Instant birthday) {
+		this.name = name;
+		this.surname = surname;
+		this.age = age;
+		this.birthday = birthday;
+	}
 	public Integer getId() {
 		return id;
 	}
@@ -49,7 +63,7 @@ public class Authour {
 	public void setSurname(String surname) {
 		this.surname = surname;
 	}
-	public int getAge() {
+	public Integer getAge() {
 		return age;
 	}
 	public void setAge(int age) {
@@ -72,5 +86,12 @@ public class Authour {
 	}
 	public void setStatus(int status) {
 		this.status = status;
+	}
+	
+	public void setAllPermitedFields(Authour authour) {
+		this.setAge(authour.getAge());
+		this.setName(authour.getName());
+		this.setSurname(authour.getSurname());
+		this.setBirthday(authour.getBirthday());
 	}
 }
