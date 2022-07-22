@@ -10,6 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 @Entity
@@ -25,7 +27,7 @@ public class Authour {
 	@Column(name= Authour.tablePrefix + "surname")
 	private String surname;
 	@Column(name= Authour.tablePrefix + "age")
-	private int age;
+	private Integer age;
 	@Column(name= Authour.tablePrefix + "birthday", nullable = false)
 	private Instant birthday;
 	@Column(name= Authour.tablePrefix + "update")
@@ -33,7 +35,7 @@ public class Authour {
 	@Column(name= Authour.tablePrefix + "create", insertable = false, updatable = false)
 	private Timestamp create; 
 	@Column(name= Authour.tablePrefix + "status", nullable = false)
-	private int status = 1;
+	private Integer status = 1;
 	
 	@OneToMany(mappedBy = "authour")
 	private Set<Book> bookList;
@@ -42,7 +44,7 @@ public class Authour {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public Authour(String name, String surname, int age, Instant birthday) {
+	public Authour(String name, String surname, Integer age, Instant birthday) {
 		this.name = name;
 		this.surname = surname;
 		this.age = age;
@@ -66,7 +68,7 @@ public class Authour {
 	public Integer getAge() {
 		return age;
 	}
-	public void setAge(int age) {
+	public void setAge(Integer age) {
 		this.age = age;
 	}
 	public Instant getBirthday() {
@@ -81,10 +83,10 @@ public class Authour {
 	public Timestamp getCreate() {
 		return create;
 	}
-	public int getStatus() {
+	public Integer getStatus() {
 		return status;
 	}
-	public void setStatus(int status) {
+	public void setStatus(Integer status) {
 		this.status = status;
 	}
 	

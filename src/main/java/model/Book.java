@@ -21,7 +21,7 @@ public class Book {
 	private static final String tablePrefix = "bk_";
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name=Book.tablePrefix + "id")
-	private int id;
+	private Integer id;
 	@Column(name= Book.tablePrefix + "name")
 	private String name;
 	
@@ -34,7 +34,7 @@ public class Book {
 	@Column(name= Book.tablePrefix + "create",  insertable = false)
 	private Timestamp create;
 	@Column(name= Book.tablePrefix + "status")
-	private int status;
+	private Integer status = 1;
 	
 	public Book() {
 		
@@ -44,7 +44,7 @@ public class Book {
 		this.name = name;
 		this.authour = authour;
 	}
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 	public String getName() {
@@ -67,10 +67,10 @@ public class Book {
 		return create;
 	}
 	
-	public int getStatus() {
+	public Integer getStatus() {
 		return status;
 	}
-	public void setStatus(int status) {
+	public void setStatus(Integer status) {
 		this.status = status;
 	}
 	

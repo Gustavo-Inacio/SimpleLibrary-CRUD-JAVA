@@ -1,19 +1,18 @@
 package library;
 
+import static org.junit.Assert.assertTrue;
+
 import java.math.BigDecimal;
-import java.rmi.server.RMIClassLoader;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import DAO.AuthourDAO;
 import DAO.BookDAO;
@@ -27,9 +26,12 @@ public class BookDaoTest {
 		Authour authour = new Authour();
 		
 		Instant i = Instant.parse("1992-02-03T11:25:30.00Z");
+		Instant instant = Instant.now();
+		
 		
 		authour.setAge(30);
-		authour.setBirthday(i);
+		//authour.setBirthday(i);
+		authour.setBirthday(instant.minus(20 * 366, ChronoUnit.DAYS));
 		authour.setName("auto generated random name " + new Random().nextInt(100));
 		authour.setSurname("person surname");
 		
@@ -53,66 +55,115 @@ public class BookDaoTest {
 		return bookSelling;
 	}
 	
-	@org.junit.jupiter.api.Test
+
+	@Test
 	public void shouldGetByAuthour(){
-		EntityManager em = JPAUtil.getEntityManeger();
-		
-		List<Book> bookList = new ArrayList<>();
 		Instant instant = Instant.now();
 		Authour authourToSeachFor = new Authour("NameGene" + Instant.now().toString(), "sunameofthe", 20, instant.minus(20 * 366, ChronoUnit.DAYS));
 		
-		AuthourDAO authourDAO = new AuthourDAO(em);
-		Authour randomAuthour = this.generateAuthour();
+		Book book1 = new Book();
+		book1.setAuthour(authourToSeachFor);
+		book1.setName("Book name to search");
 		
-		authourDAO.insert(authourToSeachFor);
-		authourDAO.insert(randomAuthour);
+		Book book2 = new Book();
+		book2.setAuthour(authourToSeachFor);
+		book2.setName("name 2");
 		
-		Book bookToBeReturned1 = new Book("book to be retured", authourToSeachFor);
-		Book bookToBeReturned2 = new Book("book to be retured", authourToSeachFor);
-		Book book1 = new Book("book name1", randomAuthour);
-		Book book2 = new Book("book name2", randomAuthour);
+		Authour authour = this.generateAuthour();
+		Book book = this.generateBook(authour);
 		
-		bookList.add(book1);
-		bookList.add(bookToBeReturned1);
-		bookList.add(bookToBeReturned2);
-		bookList.add(book2);
+		EntityManager em = JPAUtil.getEntityManeger();
+		BookDAO bookDAO = new BookDAO(em);
 		
+		em.getTransaction().begin();
+		bookDAO.insert(book);
+		bookDAO.insert(book2);
+		bookDAO.insert(book1);
 		
+		Authour authourUsedToSearch = new Authour();
+		authourUsedToSearch.setName(authourToSeachFor.getName());
+		authourUsedToSearch.setSurname(authourToSeachFor.getSurname());
+		authourUsedToSearch.setAge(authourToSeachFor.getAge());
+		
+		List<Book> selectedByAuthour = bookDAO.selectByAuthour(authourUsedToSearch);
+		Assert.assertTrue(selectedByAuthour.size() >= 2);
+		
+		selectedByAuthour.stream().forEach(bookGetter -> {
+			Assert.assertEquals(book1.getAuthour().getName(), bookGetter.getAuthour().getName());
+		});
+		
+		em.getTransaction().rollback();
+		em.close();
+	}
+	
+	@Test
+	public void shouldReturnInsertedBook() {
+		Authour authour = this.generateAuthour();
+		Book book = this.generateBook(authour);
+		
+		EntityManager em = JPAUtil.getEntityManeger();
 		BookDAO bookDao = new BookDAO(em);
-		bookDao.insert(bookList);
-		List<Book> bookListSelected = bookDao.selectByAuthour(authourToSeachFor);
+		AuthourDAO auhourDao = new AuthourDAO(em);
+		em.getTransaction().begin();
 		
-		Assert.assertEquals(2, bookListSelected.size());
-		boolean asserted1 = false;
-		boolean asserted2 = false;
+		auhourDao.insert(authour);
+		bookDao.insert(book);
 		
-		for (Book book : bookListSelected) {
-			if(book.equals(bookToBeReturned2))
-				asserted2 = true;
-			
-			if(book.equals(bookToBeReturned1))
-				asserted2 = true;
-		}
+		Integer bkId = book.getId();
+		Book bookGetter = bookDao.getBook(bkId);
 		
-		Assert.assertTrue(asserted1);
-		Assert.assertTrue(asserted2);
+		Assert.assertEquals(bkId, bookGetter.getId());
+		Assert.assertEquals(book.getName(), bookGetter.getName());
+		Assert.assertEquals(book.getAuthour(), bookGetter.getAuthour());
+		
 		
 		em.getTransaction().rollback();
 		em.close();
 		
 	}
 	
-//	public List<Book> shouldGetByPartOfInfo(Book book){
-//		
-//	}
-//	
-//	public List<Book> shouldGettAllStatus1(){
-//		
-//	}
-//	
-//	public void ShouldRemoveApplingStatusZero(Authour authour){
-//		
-//	}
+	@Test
+	public void shouldGetByPartOfInfo(){
+		Authour authour = this.generateAuthour();
+		Book insertBook = this.generateBook(authour);
+		
+		EntityManager em = JPAUtil.getEntityManeger();
+		BookDAO bookDao = new BookDAO(em);
+		
+		Book bookWithPartOfInfo = new Book();
+		em.getTransaction().begin();
+		bookDao.insert(insertBook);
+		
+		bookWithPartOfInfo.setName(insertBook.getName());
+		List<Book> bookList = bookDao.selectByPartOfInfo(bookWithPartOfInfo);
+		Assert.assertTrue(bookList.size() > 0);
+		
+		assertTrue(bookList.contains(insertBook));
+		
+		em.getTransaction().rollback();
+		em.close();
+		
+	}
+	
+	@Test
+	public void ShouldRemoveApplingStatusZero(){
+		Authour authour = this.generateAuthour();
+		Book insertBook = this.generateBook(authour);
+		
+		EntityManager em = JPAUtil.getEntityManeger();
+		BookDAO bookDao = new BookDAO(em);
+		em.getTransaction().begin();
+		
+		bookDao.insert(insertBook);
+		Integer id = insertBook.getId();
+		bookDao.remove(id);
+		
+		Book returnedBook = bookDao.getBook(id);
+		Assert.assertNull(returnedBook);
+		
+		em.getTransaction().rollback();
+		em.close();
+	}
 //	
 //	public void shouldUpdate(Authour authour){
 //		
