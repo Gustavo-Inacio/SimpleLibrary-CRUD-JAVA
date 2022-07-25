@@ -31,7 +31,7 @@ public class Book {
 	
 	@Column(name= Book.tablePrefix + "update")
 	private Timestamp update;
-	@Column(name= Book.tablePrefix + "create",  insertable = false)
+	@Column(name= Book.tablePrefix + "create",  insertable = false, updatable = false)
 	private Timestamp create;
 	@Column(name= Book.tablePrefix + "status")
 	private Integer status = 1;

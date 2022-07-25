@@ -72,7 +72,7 @@ public class TestDaoStructures {
 		auhourDao.insert(authour);
 		bookDao.insert(book);
 		
-		int bkId = book.getId();
+		Integer bkId = book.getId();
 		Book bookGetter = bookDao.getBook(bkId);
 		
 		Assert.assertEquals(bkId, bookGetter.getId());

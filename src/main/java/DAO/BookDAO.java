@@ -3,11 +3,13 @@ package DAO;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
+import dto.enter.book.UpdateBook;
 import model.Authour;
 import model.Book;
+import util.Exceptions.NoResultFoundException;
 
 public class BookDAO {
 	private EntityManager em;
@@ -19,12 +21,19 @@ public class BookDAO {
 	}
 	
 	public Book select(Integer id) {
-		TypedQuery<Book> query = em.createQuery(
-			"SELECT bk FROM Book as bk WHERE bk.id=:id AND bk.status=1",
+		return this.select(id, false);
+	}
+	
+	public Book select(Integer id, boolean allAtatus) {
+		String query = "SELECT bk FROM Book as bk WHERE bk.id=:id ";
+		if(!allAtatus) query += " AND bk.status=1";
+		
+		TypedQuery<Book> tpQuery = this.em.createQuery(
+			query,
 			Book.class
 		);
 		
-		return query.setParameter("id", id).getSingleResult();
+		return tpQuery.setParameter("id", id).getSingleResult();
 	}
 	
 	public void insert(Book book){
@@ -169,14 +178,38 @@ public class BookDAO {
 	}
 
 	public void remove(Integer id) {
-		Query query = this.em.createQuery(
-			"UPDATE Book bk set bk.status=0 Where bk.id=:id"
-		);
-		
-		query.setParameter("id", id).executeUpdate();
+		Book book = this.select(id);
+		book.setStatus(0);
 		
 	}
+
+	public void updateOne(Integer id, UpdateBook dto) throws NoResultFoundException {
+		Book book = null;
+		try {
+			book = this.select(id);
+		} catch (NoResultException e) {
+			throw new NoResultFoundException("The system has not found a book with the id " + id + ". Verify the id you are looking for this update.");
+		}	
 	
-	
+		if(dto.getName() != null) {
+			book.setName(dto.getName());
+		}
+		
+		if(dto.getAuthourId() != null) {
+			try {
+				AuthourDAO authourDao = new AuthourDAO(this.em);
+				Authour newAuthour = authourDao.getAuthour(dto.getAuthourId());
+				if(newAuthour == null)
+					throw new NoResultException();
+				book.setAuthour(newAuthour);
+			} catch (NoResultException e) {
+				throw new NoResultFoundException("The system has not found a authour with the id " + id + ". Verify the id you are looking for this update.");
+			}
+			
+		}
+		
+		
+		
+	}
 
 }

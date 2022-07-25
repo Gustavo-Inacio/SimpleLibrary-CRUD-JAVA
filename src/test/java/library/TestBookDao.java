@@ -1,6 +1,6 @@
 package library;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -8,20 +8,32 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 
-import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import DAO.AuthourDAO;
 import DAO.BookDAO;
+import dto.enter.book.UpdateBook;
 import model.Authour;
 import model.Book;
 import model.BookSelling;
+import util.Exceptions.NoResultFoundException;
 import util.JPA.JPAUtil;
 
-public class BookDaoTest {
+public class TestBookDao {
+	
+	@Test
+	public void shouldDoOk() {
+		Authour authour = new Authour();
+		
+		authour.setName("teste");
+		Assert.assertEquals(authour.getName(),"teste");
+	}
+	
+	
 	private Authour generateAuthour() {
 		Authour authour = new Authour();
 		
@@ -146,7 +158,7 @@ public class BookDaoTest {
 	}
 	
 	@Test
-	public void ShouldRemoveApplingStatusZero(){
+	public void shouldRemoveApplingStatusZero(){
 		Authour authour = this.generateAuthour();
 		Book insertBook = this.generateBook(authour);
 		
@@ -158,18 +170,74 @@ public class BookDaoTest {
 		Integer id = insertBook.getId();
 		bookDao.remove(id);
 		
-		Book returnedBook = bookDao.getBook(id);
-		Assert.assertNull(returnedBook);
+		Book returnedBook = bookDao.select(id, true);
+		System.out.println("returnedddd -> " + returnedBook.getStatus());
+		Assert.assertTrue(returnedBook.getStatus() == 0);
 		
 		em.getTransaction().rollback();
 		em.close();
 	}
-//	
-//	public void shouldUpdate(Authour authour){
-//		
-//	}
-//	
-//	public List<Book> shouldSelectAllEvenThoseWithStatusZero(Authour authour){
-//		
-//	}
+	
+	@Test
+	public void shouldUpdate() throws NoResultFoundException{
+		Authour authour = this.generateAuthour();
+		Book insertBook = this.generateBook(authour);
+		insertBook.setName("name before change");
+		
+		EntityManager em = JPAUtil.getEntityManeger();
+		BookDAO bookDao = new BookDAO(em);
+		em.getTransaction().begin();
+		
+		bookDao.insert(insertBook);
+		
+		Integer authourId = bookDao.getBook(insertBook.getId()).getAuthour().getId();
+		Integer bookId = bookDao.getBook(insertBook.getId()).getId();
+		
+		UpdateBook dtoUpdateBook = new UpdateBook();
+	
+		dtoUpdateBook.setName("new name");
+		dtoUpdateBook.setId(bookId);
+		dtoUpdateBook.setAuthourId(authourId);
+		
+		bookDao.updateOne(dtoUpdateBook.getId(), dtoUpdateBook);
+		
+		Book bookReturned = bookDao.getBook(insertBook.getId());
+		Assert.assertEquals("new name", bookReturned.getName());
+		Assert.assertEquals(bookReturned.getAuthour().getId(), dtoUpdateBook.getAuthourId());
+		
+		em.getTransaction().rollback();
+		em.close();
+	}
+	
+	@Test(expected = NoResultFoundException.class)
+	public void shouldThrowAnExceptionOnUpdateForGivingAWrongBookAuthourId() throws NoResultFoundException{
+		Authour authour = this.generateAuthour();
+		Book insertBook = this.generateBook(authour);
+		insertBook.setName("name before change");
+		
+		EntityManager em = JPAUtil.getEntityManeger();
+		BookDAO bookDao = new BookDAO(em);
+		em.getTransaction().begin();
+		
+		bookDao.insert(insertBook);
+		
+		Integer authourId = bookDao.getBook(insertBook.getId()).getAuthour().getId();
+		Integer bookId = bookDao.getBook(insertBook.getId()).getId();
+		
+		UpdateBook dtoUpdateBook = new UpdateBook();
+	
+		dtoUpdateBook.setName("new name");
+		dtoUpdateBook.setId(bookId);
+		dtoUpdateBook.setAuthourId(-1);
+		
+		bookDao.updateOne(dtoUpdateBook.getId(), dtoUpdateBook);
+		
+		Book bookReturned = bookDao.getBook(insertBook.getId());
+		Assert.assertEquals("new name", bookReturned.getName());
+		Assert.assertEquals(bookReturned.getAuthour().getId(), dtoUpdateBook.getAuthourId());
+		
+		em.getTransaction().rollback();
+		em.close();
+	}
+	
 }
