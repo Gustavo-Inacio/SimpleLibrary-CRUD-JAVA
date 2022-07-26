@@ -22,6 +22,12 @@ public class AuthourDAO {
 		this.em.persist(authour);
 	}
 	
+	public void insert(List<Authour> autours) {
+		autours.forEach(item -> {
+			this.insert(item);
+		});
+	}
+	
 	public List<Authour> selectAll(){
 		String query = "SELECT bk Authour book as bk";
 		return this.em.createQuery(query, Authour.class).getResultList();

@@ -20,7 +20,7 @@ public class BookSelling {
 	private static final String tablePrefix = "bs_";
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name=BookSelling.tablePrefix + "id")
-	private int id;
+	private Integer id;
 	@Column(name= BookSelling.tablePrefix + "client_name")
 	private String clientName;
 	
@@ -33,17 +33,17 @@ public class BookSelling {
 	
 	@Column(name= BookSelling.tablePrefix + "update")
 	private Timestamp update;
-	@Column(name= BookSelling.tablePrefix + "create", insertable = false)
+	@Column(name= BookSelling.tablePrefix + "create", insertable = false, updatable = false)
 	private Timestamp create;
 	@Column(name= BookSelling.tablePrefix + "status")
-	private int status;
+	private Integer status = 1;
 	
 	
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 	
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 	public String getClientName() {
@@ -70,10 +70,10 @@ public class BookSelling {
 	public Timestamp getCreate() {
 		return create;
 	}
-	public int getStatus() {
+	public Integer getStatus() {
 		return status;
 	}
-	public void setStatus(int status) {
+	public void setStatus(Integer status) {
 		this.status = status;
 	}
 }

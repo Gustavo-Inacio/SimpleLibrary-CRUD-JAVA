@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Random;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import DAO.AuthourDAO;
 import DAO.BookDAO;
@@ -209,35 +209,38 @@ public class TestBookDao {
 		em.close();
 	}
 	
-	@Test(expected = NoResultFoundException.class)
+	@Test
 	public void shouldThrowAnExceptionOnUpdateForGivingAWrongBookAuthourId() throws NoResultFoundException{
-		Authour authour = this.generateAuthour();
-		Book insertBook = this.generateBook(authour);
-		insertBook.setName("name before change");
+		NoResultFoundException thrown = Assertions.assertThrows(NoResultFoundException.class, () -> {
+			Authour authour = this.generateAuthour();
+			Book insertBook = this.generateBook(authour);
+			insertBook.setName("name before change");
+			
+			EntityManager em = JPAUtil.getEntityManeger();
+			BookDAO bookDao = new BookDAO(em);
+			em.getTransaction().begin();
+			
+			bookDao.insert(insertBook);
+			
+			Integer authourId = bookDao.getBook(insertBook.getId()).getAuthour().getId();
+			Integer bookId = bookDao.getBook(insertBook.getId()).getId();
+			
+			UpdateBook dtoUpdateBook = new UpdateBook();
 		
-		EntityManager em = JPAUtil.getEntityManeger();
-		BookDAO bookDao = new BookDAO(em);
-		em.getTransaction().begin();
+			dtoUpdateBook.setName("new name");
+			dtoUpdateBook.setId(bookId);
+			dtoUpdateBook.setAuthourId(-1);
+			
+			bookDao.updateOne(dtoUpdateBook.getId(), dtoUpdateBook);
+			
+			Book bookReturned = bookDao.getBook(insertBook.getId());
+			Assert.assertEquals("new name", bookReturned.getName());
+			Assert.assertEquals(bookReturned.getAuthour().getId(), dtoUpdateBook.getAuthourId());
+			
+			em.getTransaction().rollback();
+			em.close();
+		});
 		
-		bookDao.insert(insertBook);
-		
-		Integer authourId = bookDao.getBook(insertBook.getId()).getAuthour().getId();
-		Integer bookId = bookDao.getBook(insertBook.getId()).getId();
-		
-		UpdateBook dtoUpdateBook = new UpdateBook();
-	
-		dtoUpdateBook.setName("new name");
-		dtoUpdateBook.setId(bookId);
-		dtoUpdateBook.setAuthourId(-1);
-		
-		bookDao.updateOne(dtoUpdateBook.getId(), dtoUpdateBook);
-		
-		Book bookReturned = bookDao.getBook(insertBook.getId());
-		Assert.assertEquals("new name", bookReturned.getName());
-		Assert.assertEquals(bookReturned.getAuthour().getId(), dtoUpdateBook.getAuthourId());
-		
-		em.getTransaction().rollback();
-		em.close();
 	}
 	
 }
