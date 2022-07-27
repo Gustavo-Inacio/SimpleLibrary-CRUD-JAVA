@@ -126,7 +126,7 @@ public class BookSellingDAO {
 
 	public List<BookSelling> selectByPeriod(Date startPeriod, Date endOfPeriod) {
 		TypedQuery<BookSelling> tpQuery = this.em.createQuery(
-			"SELECT bs FROM BookSelling as bs WHERE status=1 AND bs.create >= :start AND bs.create <= :final",
+			"SELECT bs FROM BookSelling as bs WHERE bs.status=1 AND bs.create >= :start AND bs.create <= :final",
 			BookSelling.class
 		);
 		

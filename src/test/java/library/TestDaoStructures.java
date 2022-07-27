@@ -9,7 +9,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import DAO.AuthourDAO;
 import DAO.BookDAO;
@@ -17,6 +18,7 @@ import DAO.BookSellingDAO;
 import model.Authour;
 import model.Book;
 import model.BookSelling;
+import util.Exceptions.RouteNotFoundException;
 import util.JPA.JPAUtil;
 
 public class TestDaoStructures {
@@ -125,20 +127,21 @@ public class TestDaoStructures {
 		Assert.assertEquals(0, status);
 	}
 	
-	@Test(expected= PersistenceException.class)
 	public void shouldNotInsertAuthourBecauseDataIsNull() {
-		Authour authour = this.generateAuthour();
-		authour.setName(null);
-		authour.setBirthday(null);
-		
-		EntityManager em = JPAUtil.getEntityManeger();
-		AuthourDAO authourDao = new AuthourDAO(em);
-		em.getTransaction().begin();
-		
-		authourDao.insert(authour);
-		
-		em.getTransaction().rollback();
-		em.close();
+		Assertions.assertThrows(PersistenceException.class, () -> {
+			Authour authour = this.generateAuthour();
+			authour.setName(null);
+			authour.setBirthday(null);
+			
+			EntityManager em = JPAUtil.getEntityManeger();
+			AuthourDAO authourDao = new AuthourDAO(em);
+			em.getTransaction().begin();
+			
+			authourDao.insert(authour);
+			
+			em.getTransaction().rollback();
+			em.close();
+		});
 	}
 	
 	@Test

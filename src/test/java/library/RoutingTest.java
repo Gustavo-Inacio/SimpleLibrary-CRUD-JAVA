@@ -4,7 +4,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import route.RequestedPathRoute;
 import route.Route;
@@ -12,7 +13,6 @@ import route.RouteTree;
 import route.RoutesMapping;
 import service.action.Action;
 import service.action.CreateAuthour;
-import util.Exceptions.ActionClassMustImplementsActionInterface;
 import util.Exceptions.RouteNotFoundException;
 import util.enuns.HttpMethods;
 import util.messages.Message;
@@ -37,22 +37,24 @@ public class RoutingTest {
 		Assert.assertEquals(route.getActionClass(), CreateAuthour.class);
 	}
 	
-	@Test(expected = RouteNotFoundException.class)
 	public void shouldThrowARouteNotFoundException() throws RouteNotFoundException {
-		String URI = "/library/authour";
-		HttpMethods method = HttpMethods.POST;
-		
-		RequestedPathRoute rpr = new RequestedPathRoute(URI, method);
-		Route route = RoutesMapping.getRoute(rpr);
+		Assertions.assertThrows(RouteNotFoundException.class, () -> {
+			String URI = "/library/authour";
+			HttpMethods method = HttpMethods.POST;
+			
+			RequestedPathRoute rpr = new RequestedPathRoute(URI, method);
+			Route route = RoutesMapping.getRoute(rpr);
+		});
 	}
 	
-	@Test(expected = RouteNotFoundException.class)
 	public void shouldThrowARouteNotFoundExceptionForEmpty() throws RouteNotFoundException{
-		String URI = "/";
-		HttpMethods method = HttpMethods.POST;
-		
-		RequestedPathRoute rpr = new RequestedPathRoute(URI, method);
-		Route route = RoutesMapping.getRoute(rpr);
+		Assertions.assertThrows(RouteNotFoundException.class, () -> {
+			String URI = "/";
+			HttpMethods method = HttpMethods.POST;
+			
+			RequestedPathRoute rpr = new RequestedPathRoute(URI, method);
+			Route route = RoutesMapping.getRoute(rpr);
+		});
 	}
 	
 	@Test
