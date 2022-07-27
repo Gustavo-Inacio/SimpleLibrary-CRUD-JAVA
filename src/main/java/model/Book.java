@@ -2,6 +2,7 @@ package model;
 
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -20,21 +21,30 @@ public class Book {
 	private static final String tablePrefix = "bk_";
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name=Book.tablePrefix + "id")
-	private int id;
+	private Integer id;
 	@Column(name= Book.tablePrefix + "name")
 	private String name;
 	
-	@ManyToOne(fetch = FetchType.LAZY) 
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST) 
 	@JoinColumn(foreignKey = @ForeignKey(name= Book.tablePrefix + "authour_fk"), name=Book.tablePrefix + "authour_fk", nullable=false)
 	private Authour authour;
 	
 	@Column(name= Book.tablePrefix + "update")
 	private Timestamp update;
-	@Column(name= Book.tablePrefix + "create",  insertable = false)
+	@Column(name= Book.tablePrefix + "create",  insertable = false, updatable = false)
 	private Timestamp create;
 	@Column(name= Book.tablePrefix + "status")
-	private int status;
-	public int getId() {
+	private Integer status = 1;
+	
+	public Book() {
+		
+	}
+	
+	public Book(String name, Authour authour) {
+		this.name = name;
+		this.authour = authour;
+	}
+	public Integer getId() {
 		return id;
 	}
 	public String getName() {
@@ -57,10 +67,10 @@ public class Book {
 		return create;
 	}
 	
-	public int getStatus() {
+	public Integer getStatus() {
 		return status;
 	}
-	public void setStatus(int status) {
+	public void setStatus(Integer status) {
 		this.status = status;
 	}
 	
